@@ -45,6 +45,16 @@ function salir() {
           <span></span> Equipos
         </RouterLink>
 
+        <RouterLink to="/inscripciones" class="nav-link">
+          <span class="nav-icon"></span>
+          <span>Inscripciones</span>
+        </RouterLink>
+
+        <RouterLink to="/partidos" class="nav-link">
+          <span class="nav-icon"></span>
+          <span>Partidos</span>
+        </RouterLink>
+
         <RouterLink to="/ranking" class="nav-link" active-class="active">
           <span></span> Ranking
         </RouterLink>

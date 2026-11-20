@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+import PartidosView from '../views/PartidosView.vue'
+import InscripcionesView from '../views/InscripcionesView.vue'
 import InicioView from '../views/InicioView.vue'
 import TorneosView from '../views/TorneosView.vue'
 import EquiposView from '../views/EquiposView.vue'
@@ -10,6 +12,11 @@ import RegistroView from '../views/RegistroView.vue'
 import { estaAutenticado, obtenerUsuario } from '../services/authService.js'
 
 const routes = [
+  {
+  path: '/partidos',
+  name: 'partidos',
+  component: PartidosView,
+  },
   {
     path: '/login',
     name: 'login',
@@ -41,6 +48,11 @@ const routes = [
     path: '/ranking',
     name: 'ranking',
     component: RankingView,
+  },
+  {
+  path: '/inscripciones',
+  name: 'inscripciones',
+  component: InscripcionesView,
   },
 ]
 
