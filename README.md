@@ -286,11 +286,3 @@ Para organizar y realizar el seguimiento del desarrollo del proyecto se utilizó
 En el tablero se registran las tareas y su estado de avance, organizadas en las columnas Pendiente, En proceso y Terminado.
 
 **Tablero de gestión de tareas:** https://github.com/users/DarkAngelCV/projects/1
-
-## Gestión de tareas
-
-Para organizar y realizar el seguimiento del desarrollo del proyecto se utilizó un tablero Kanban de GitHub Projects.
-
-En el tablero se registran las tareas y su estado de avance, organizadas en las columnas Pendiente, En proceso y Terminado.
-
-**Tablero de gestión de tareas:** https://github.com/users/DarkAngelCV/projects/1
