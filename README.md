@@ -278,3 +278,11 @@ También las utilicé como ayuda para revisar y mejorar algunas partes del códi
 **Institución:** Instituto Profesional Virginio Gómez  
 **Sede:** Chillán  
 **Asignatura:** Lenguaje de Programación Web II
+
+## Gestión de tareas
+
+Para organizar y realizar el seguimiento del desarrollo del proyecto se utilizó un tablero Kanban de GitHub Projects.
+
+En el tablero se registran las tareas y su estado de avance, organizadas en las columnas Pendiente, En proceso y Terminado.
+
+**Tablero de gestión de tareas:** https://github.com/users/DarkAngelCV/projects/1
