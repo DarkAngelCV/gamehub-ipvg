@@ -55,6 +55,11 @@ function salir() {
           <span>Partidos</span>
         </RouterLink>
 
+        <RouterLink to="/resultados" class="nav-link">
+          <span class="nav-icon"></span>
+          <span>Resultados</span>
+        </RouterLink>
+
         <RouterLink to="/ranking" class="nav-link" active-class="active">
           <span></span> Ranking
         </RouterLink>
