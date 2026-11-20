@@ -1,46 +1,84 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { apiFetch } from '../services/api.js'
+
+const cargando = ref(true)
+const error = ref('')
+const torneos = ref([])
 
 const estadisticas = ref([
-  {
-    titulo: 'Torneos activos',
-    valor: '3'
-  },
-  {
-    titulo: 'Equipos registrados',
-    valor: '12'
-  },
-  {
-    titulo: 'Partidos jugados',
-    valor: '24'
-  },
-  {
-    titulo: 'Estudiantes',
-    valor: '48'
-  },
+  { titulo: 'Torneos registrados', valor: 0 },
+  { titulo: 'Equipos registrados', valor: 0 },
+  { titulo: 'Partidos jugados', valor: 0 },
+  { titulo: 'Partidos pendientes', valor: 0},
 ])
 
-const torneos = ref([
-  {
-    nombre: 'Torneo FIFA 26',
-    juego: 'EA Sports FC 26',
-    fecha: '20 de noviembre de 2026',
-    estado: 'Inscripciones abiertas',
-  },
-  {
-    nombre: 'Campeonato Valorant',
-    juego: 'Valorant',
-    fecha: '25 de noviembre de 2026',
-    estado: 'Próximamente',
-  },
-  {
-    nombre: 'Torneo League of Legends',
-    juego: 'League of Legends',
-    fecha: '30 de noviembre de 2026',
-    estado: 'Próximamente',
-  },
-])
+function normalizarLista(datos) {
+  if (Array.isArray(datos)) return datos
+  if (Array.isArray(datos?.value)) return datos.value
+  return []
+}
+
+function formatearFecha(fecha) {
+  if (!fecha) return 'Fecha no definida'
+
+  const fechaLocal = new Date(`${fecha.toString().slice(0, 10)}T00:00:00`)
+
+  if (Number.isNaN(fechaLocal.getTime())) return 'Fecha no definida'
+
+  return fechaLocal.toLocaleDateString('es-CL', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+}
+
+async function cargarInicio() {
+  cargando.value = true
+  error.value = ''
+
+  try {
+    const [datosTorneos, datosEquipos, datosPartidos] = await Promise.all([
+      apiFetch('/torneos'),
+      apiFetch('/equipos'),
+      apiFetch('/partidos'),
+    ])
+
+    const listaTorneos = normalizarLista(datosTorneos)
+    const listaEquipos = normalizarLista(datosEquipos)
+    const listaPartidos = normalizarLista(datosPartidos)
+
+    const finalizados = listaPartidos.filter(
+      partido => partido.estado === 'Finalizado',
+    ).length
+
+    const pendientes = listaPartidos.filter(
+      partido => partido.estado === 'Pendiente',
+    ).length
+
+    estadisticas.value = [
+      { titulo: 'Torneos registrados', valor: listaTorneos.length },
+      { titulo: 'Equipos registrados', valor: listaEquipos.length },
+      { titulo: 'Partidos jugados', valor: finalizados },
+      { titulo: 'Partidos pendientes', valor: pendientes},
+    ]
+
+    torneos.value = listaTorneos.slice(0, 3).map(torneo => ({
+      nombre: torneo.nombre,
+      juego: torneo.videojuego,
+      fecha: formatearFecha(torneo.fechaInicio),
+      estado: torneo.estado || 'Sin estado',
+    }))
+  } catch (err) {
+    error.value = err.message || 'No se pudo cargar la información del inicio.'
+  } finally {
+    cargando.value = false
+  }
+}
+
+onMounted(cargarInicio)
 </script>
+
 
 <template>
   <div class="dashboard">
@@ -56,55 +94,67 @@ const torneos = ref([
 
     </section>
 
-    <section class="stats-grid">
-      <article
-        v-for="estadistica in estadisticas"
-        :key="estadistica.titulo"
-        class="stat-card"
+
+<section class="stats-grid">
+  <article
+    v-for="estadistica in estadisticas"
+    :key="estadistica.titulo"
+    class="stat-card"
+  >
+    <div class="stat-icon" :class="estadistica.color">
+      {{ estadistica.icono }}
+    </div>
+
+    <div>
+      <p>{{ estadistica.titulo }}</p>
+      <h2>{{ cargando ? '...' : estadistica.valor }}</h2>
+    </div>
+  </article>
+</section>
+
+<section class="tournaments-section">
+  <div class="section-heading">
+    <div>
+      <h2>Torneos destacados</h2>
+      <p>Conoce las próximas competencias disponibles.</p>
+    </div>
+  </div>
+
+  <p v-if="cargando" class="message">
+    Cargando torneos...
+  </p>
+
+  <p v-else-if="error" class="error-message">
+    {{ error }}
+  </p>
+
+  <p v-else-if="torneos.length === 0" class="message">
+    Todavía no hay torneos registrados.
+  </p>
+
+  <div v-else class="tournament-list">
+    <article
+      v-for="(torneo, index) in torneos"
+      :key="torneo.nombre + index"
+      class="tournament-card"
+    >
+
+      <div class="tournament-info">
+        <h3>{{ torneo.nombre }}</h3>
+        <p>{{ torneo.juego }}</p>
+        <span>{{ torneo.fecha }}</span>
+      </div>
+
+      <span
+        class="tournament-status"
+        :class="{ open: torneo.estado === 'En curso' }"
       >
-        <div class="stat-icon" :class="estadistica.color">
-          {{ estadistica.icono }}
-        </div>
+        {{ torneo.estado }}
+      </span>
+    </article>
+  </div>
+</section>
 
-        <div>
-          <p>{{ estadistica.titulo }}</p>
-          <h2>{{ estadistica.valor }}</h2>
-        </div>
-      </article>
-    </section>
-
-    <section class="tournaments-section">
-      <div class="section-heading">
-        <div>
-          <h2>Torneos destacados</h2>
-          <p>Conoce las próximas competencias disponibles.</p>
-        </div>
-      </div>
-
-      <div class="tournament-list">
-        <article
-          v-for="torneo in torneos"
-          :key="torneo.nombre"
-          class="tournament-card"
-        >
-
-          <div class="tournament-info">
-            <h3>{{ torneo.nombre }}</h3>
-            <p>{{ torneo.juego }}</p>
-            <span>{{ torneo.fecha }}</span>
-          </div>
-
-          <span
-            class="tournament-status"
-            :class="{
-              open: torneo.estado === 'Inscripciones abiertas',
-            }"
-          >
-            {{ torneo.estado }}
-          </span>
-        </article>
-      </div>
-    </section>
 
     <section class="info-banner">
       <div>
@@ -343,5 +393,25 @@ const torneos = ref([
   .tournament-status {
     margin-left: 60px;
   }
+
+.message {
+  padding: 22px;
+  text-align: center;
+  color: #64748b;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+.error-message {
+  padding: 18px;
+  color: #b91c1c;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
 }
 </style>
